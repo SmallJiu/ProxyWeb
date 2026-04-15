@@ -43,7 +43,7 @@ project/
 ## 🚀 快速开始
 
 ### 0. 安装Python
-在 [Python](https://python.org/downloads/)(https://python.org/downloads/) 官网安装 `Python3.6` 或以上
+在 [Python](https://python.org/downloads/) 官网安装 `Python3.6` 或以上
 
 ### 1. 准备站点内容
 
