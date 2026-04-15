@@ -1,0 +1,15 @@
+{
+    "webs": [
+        {
+            "name": "反代站点1",
+            "path": "proxy-site",
+            "url": "https://www.example.com"
+        },
+        {
+            "name": "内部API",
+            "path": "local-api",
+            "url": "http://127.0.0.1:5001/api",
+            "hide": true
+        }
+    ]
+}
