@@ -8,7 +8,7 @@
 
 | 模块 | 说明 |
 |------|------|
-| **📂 目录扫描与配置解析** | 自动扫描 `webs/` 下的本地站点（含 `index.html`）和全局代理配置 `webs/index.json`。 |
+| **📂 目录扫描与配置解析** | 自动扫描 `webs/` 下的本地站点（含 `index.html`）和全局代理配置 `webs/index.json`。本地站点支持独立配置文件 `config.json` 自定义名称与访问路径。 |
 | **🌲 树形导航首页** | 生成可点击的站点列表，区分本地站点（蓝色标签）与代理站点（绿色标签）。 |
 | **🏠 本地静态托管** | 直接提供 `webs/` 内静态文件服务，自动重定向目录并返回 `index.html`。 |
 | **🔄 反向代理** | 将配置的代理路径请求转发至目标 URL，透传请求方法、头部、Cookie 与数据体。 |
@@ -22,8 +22,9 @@
 ## 📁 项目结构
 ```
 project/
-├── app.py                 # 主程序入口
+├── main.py                # 主程序入口
 ├── requirements.txt       # Python 依赖
+├── run.bat / run.sh       # 启动脚本（Windows / Linux）
 ├── README.md              # 项目说明（本文件）
 ├── static/                # 可选全局静态文件（不会被代理影响）
 ├── templates/             # HTML 模板目录
@@ -31,11 +32,12 @@ project/
 │   ├── 404.html           # 404 错误页
 │   └── 502.html           # 502 错误页
 └── webs/                  # 站点根目录（需自行创建）
-    ├── index.json         # 全局代理配置文件
-    ├── site-a/            # 本地站点示例
-    │   └── index.html
-    └── another-site/      # 另一个本地站点
-        └── index.html
+├── index.json         # 全局代理配置文件
+├── my-blog/           # 本地站点示例
+│   ├── index.html
+│   └── config.json    # 本地站点配置文件（可选）
+└── docs/              # 另一个本地站点
+└── index.html
 ```
 
 ---
@@ -49,7 +51,7 @@ project/
 
 在 `webs/` 目录下按需添加：
 
-- **本地站点**：创建子目录（如 `my-blog/`），并在其中放置 `index.html` 及其他静态资源。
+- **本地站点**：创建子目录（如 `my-blog/`），并在其中放置 `index.html` 及其他静态资源。可添加 `config.json` 自定义站点信息（详见下方配置说明）。
 - **代理站点**：编辑 `webs/index.json` 添加代理规则（见下方配置说明）。
 
 ### 2. 启动服务
@@ -66,7 +68,9 @@ project/
 
 ## ⚙️ 配置说明
 
-代理站点配置统一存放在 `webs/index.json` 中，支持两种格式：
+### 代理站点配置（`webs/index.json`）
+
+统一存放代理规则，支持两种格式：
 
 ```json
 {
@@ -93,7 +97,27 @@ project/
 | `url`  | 实际代理的后端地址（支持 HTTP/HTTPS） |
 | `hide` | 可选，设置为 `true` 可隐藏在导航页面中，但仍可通过直接访问路径访问 |
 
-> ⚠️ 若本地站点目录名与代理 `path` 重复，代理规则优先。
+### 本地站点配置（`webs/站点目录/config.json`）
+
+在每个本地站点的根目录下可放置 `config.json`，用于自定义显示名称和访问路径。
+
+```json
+{
+    "name": "我的技术博客",
+    "path": "blog"
+}
+```
+
+| 字段     | 说明 |
+|--------|--|
+| `name` | 在导航页面上显示的名称（不填则使用物理目录名） |
+| `path` | 自定义访问路径，如 `blog` 对应 `/blog/`（不填则使用物理目录名） |
+
+**示例效果：**
+- 物理目录为 `webs/my-site/`，配置 `path: "blog"` 后，可通过 `/blog/` 访问。
+- 原始物理路径 `/my-site/` 仍然可用（兼容性保留）。
+
+> ⚠️ 若自定义路径与代理站点或其他本地站点路径冲突，后加载的站点将被忽略并输出警告日志。
 
 ---
 
@@ -103,13 +127,17 @@ project/
 假设在 `webs/docs/` 下放置了静态文档：
 - 浏览器打开 `http://localhost/docs/` 即可浏览。
 
+若在 `webs/docs/config.json` 中配置了 `{"name": "项目文档", "path": "project-docs"}`：
+- 导航页将显示“项目文档”，链接指向 `/project-docs/`。
+- 访问 `/project-docs/` 实际展示 `webs/docs/` 内容。
+
 ### 访问代理站点
 配置了 `path: "site1"` 且目标为 `http://127.0.0.1:5001` 时：
 - 访问 `http://localhost/site1/` 将反向代理至 `http://127.0.0.1:5001/`。
 
 ### 绝对路径资源自动补全
-若代理页面 `site1` 中包含 `<script src="/app.js"></script>`
-- 会自动 307 重定向至 `http://localhost/site1/app.js` ，从而正确从后端获取资源。
+若代理页面 `site1` 中包含 `<script src="/app.js"></script>`：
+- 会自动 307 重定向至 `http://localhost/site1/app.js`，从而正确从后端获取资源。
 
 ---
 
@@ -117,7 +145,7 @@ project/
 
 ### 修改监听端口
 
-编辑 `app.py` 末尾：
+编辑 `main.py` 末尾：
 
 ```python
 app.run(host='0.0.0.0', port=80)
