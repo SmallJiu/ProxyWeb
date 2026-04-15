@@ -42,6 +42,9 @@ project/
 
 ## 🚀 快速开始
 
+### 0. 安装Python
+在 [Python](https://python.org/) 官网安装 `Python3.6` 或以上
+
 ### 1. 准备站点内容
 
 在 `webs/` 目录下按需添加：
@@ -126,7 +129,7 @@ app.run(host='0.0.0.0', port=80)
 
 ### 关闭日志过滤
 
-删除或注释 `Non200Filter` 相关代码即可恢复全部请求日志。
+删除或注释 `LoggerFilter` 相关代码即可恢复全部请求日志。
 
 ---
 
