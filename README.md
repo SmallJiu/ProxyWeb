@@ -32,12 +32,12 @@ project/
 │   ├── 404.html           # 404 错误页
 │   └── 502.html           # 502 错误页
 └── webs/                  # 站点根目录（需自行创建）
-├── index.json         # 全局代理配置文件
-├── my-blog/           # 本地站点示例
-│   ├── index.html
-│   └── config.json    # 本地站点配置文件（可选）
-└── docs/              # 另一个本地站点
-└── index.html
+    ├── index.json         # 全局代理配置文件
+    ├── my-blog/           # 本地站点示例
+    │   ├── index.html
+    │   └── config.json    # 本地站点配置文件（可选）
+    └── docs/              # 另一个本地站点
+    └── index.html
 ```
 
 ---
