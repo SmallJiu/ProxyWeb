@@ -4,7 +4,7 @@ import logging
 import requests
 from flask import Flask, render_template, request, Response, abort, send_from_directory, redirect, url_for
 from werkzeug.utils import safe_join
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin, urlparse, urlunparse
 
 # ---------- 自定义日志过滤器：只记录非 200 状态码的请求 ----------
 class LoggerFilter(logging.Filter):
