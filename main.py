@@ -63,7 +63,8 @@ def load_proxy_configs():
             'name': item.get('name', ''),
             'path': item.get('path', '').strip('/'),
             'url': item.get('url', '').rstrip('/'),
-            'hide': item.get('hide', False)
+            'hide': item.get('hide', False),
+            'direct': item.get('direct', False)
         })
     return configs
 
@@ -105,7 +106,8 @@ def scan_sites():
                 'name': cfg['name'],
                 'path': cfg['path'],
                 'type': 'proxy',
-                'url': cfg['url']
+                'url': cfg['url'],
+                'direct': cfg['direct']
             })
 
     # 2. 扫描本地站点（排除已被代理占用的路径）
@@ -198,6 +200,25 @@ def bad_gateway(e):
 @app.route('/')
 def index():
     sites = scan_sites()
+	# 处理 direct 代理站点的 URL 替换（本地地址 → 当前请求主机）
+    for site in sites:
+        if site['type'] == 'proxy' and site.get('direct'):
+            original_url = site['url']
+            parsed = urlparse(original_url)
+            # 判断是否为本地回环地址
+            if parsed.hostname in ('127.0.0.1', 'localhost', '::1'):
+                # 获取当前请求的主机名（不含端口）
+                current_hostname = request.host.split(':')[0]
+                # 保留原端口
+                if parsed.port:
+                    new_netloc = f"{current_hostname}:{parsed.port}"
+                else:
+                    new_netloc = current_hostname
+                # 构造新 URL
+                new_parsed = parsed._replace(netloc=new_netloc)
+                site['direct_url'] = urlunparse(new_parsed)
+            else:
+                site['direct_url'] = original_url
     return render_template('index.html', sites=sites)
 
 # ---------- 本地静态文件服务 & 代理分发 ----------
@@ -351,4 +372,4 @@ def handle_absolute_resource():
 # ---------- 启动入口 ----------
 if __name__ == '__main__':
     os.makedirs(WEBS_DIR, exist_ok=True)
-    app.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0', port=80, threaded=True)

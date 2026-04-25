@@ -85,6 +85,12 @@ project/
             "path": "api",
             "url": "http://127.0.0.1:5001/api",
             "hide": true
+        },
+        {
+            "name": "本地直接服务",
+            "path": "direct_service",
+            "url": "http://127.0.0.1:8080",
+            "direct": true
         }
     ]
 }
@@ -93,9 +99,10 @@ project/
 | 字段     | 说明 |
 |--------|--|
 | `name` | 在导航页面上显示的名称 |
-| `path` | URL 子路径，如 `site1` 对应 `/site1/` |
+| `path` | URL 子路径，如 `site1` 对应 `/site1/`（当 `direct` 为 `true` 时，该路径不会作为代理前缀，但必须保留用于标识站点） |
 | `url`  | 实际代理的后端地址（支持 HTTP/HTTPS） |
 | `hide` | 可选，设置为 `true` 可隐藏在导航页面中，但仍可通过直接访问路径访问 |
+| `direct` | 可选，设置为 `true` 时导航页链接将直接指向原始 URL，而不再通过网关代理。若原始地址是本地回环地址（`127.0.0.1`、`localhost` 或 `::1`），则自动替换为当前访问网关所用的主机名，方便外部访问。默认为 `false`。 |
 
 ### 本地站点配置（`webs/站点目录/config.json`）
 
@@ -134,6 +141,10 @@ project/
 ### 访问代理站点
 配置了 `path: "site1"` 且目标为 `http://127.0.0.1:5001` 时：
 - 访问 `http://localhost/site1/` 将反向代理至 `http://127.0.0.1:5001/`。
+
+### 直接访问模式（`direct`）
+在配置中设置 `"direct": true` 后，导航页会直接链接到目标 URL，而不再经过网关代理。
+- 若 `url` 为 `http://127.0.0.1:8080`，且当前访问网关的地址为 `http://myserver`，则导航链接自动变为 `http://myserver:8080`，点击后浏览器直接打开该地址。
 
 ### 绝对路径资源自动补全
 若代理页面 `site1` 中包含 `<script src="/app.js"></script>`：

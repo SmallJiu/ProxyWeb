@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>站点导航 · 网关</title>
+    <title>站点导航</title>
     <style>
         /* 基础变量 —— 默认暗色 */
         :root {
@@ -156,7 +156,11 @@
         {% if sites %}
             {% for site in sites %}
             <div class="site-item">
-                <a class="site-link" href="/{{ site.path }}/">
+                {% if site.type == 'proxy' and site.get('direct') %}
+					<a class="site-link" href="{{ site.direct_url }}">
+				{% else %}
+					<a class="site-link" href="/{{ site.path }}/">
+				{% endif %}
                     <span>📄 {{ site.name }}</span>
                     {% if site.type == 'local' %}
                     <span class="badge local">本地</span>
